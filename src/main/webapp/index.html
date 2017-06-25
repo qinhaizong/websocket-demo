@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+<script type="application/javascript" src="/assets/js/sockjs.min.js"></script>
+<script type="application/javascript" src="/assets/js/stomp.min.js"></script>
+<script type="application/javascript">
+    var socket = new SockJS('/portfolio');
+    /*var client = Stomp.over(socket);
+
+     client.connect({}, function (frame) {
+     console.log("@@@"+frame.command);
+     });*/
+
+    var p = new Promise(function (resolve, reject) {
+        var client = Stomp.over(socket);
+        client.connect({}, function (frame) {
+            if (frame.command === 'CONNECTED') {
+                resolve(client);
+            } else {
+                reject(client);
+            }
+        })
+    });
+    p.then(function (client) {
+        client.subscribe('/topic/greeting', function (event) {
+            console.log("echo from server...");
+            console.log(event)
+        }, {});
+        client.send("/app/greeting", {}, JSON.stringify({name: 'demo', age: 10}));
+    })
+
+    /*client.subscribe('/topic/greeting', function (event) {
+     console.log("echo from server...");
+     console.log(event)
+     }, {});*/
+
+
+    //client.send("/app/greeting", {}, JSON.stringify({name: 'haizong', age: 34}));
+</script>
+</body>
+</html>
